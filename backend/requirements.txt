@@ -1,0 +1,10 @@
+﻿fastapi
+uvicorn
+python-dotenv
+langchain-community
+langchain-huggingface
+langchain-core
+faiss-cpu
+youtube-transcript-api
+sentence-transformers
+huggingface-hub

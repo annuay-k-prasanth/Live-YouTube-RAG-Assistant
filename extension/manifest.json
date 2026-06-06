@@ -26,7 +26,7 @@
   ],
 
   "host_permissions": [
-    "http://localhost:8000/*"
+    "https://live-youtube-rag-assistant-production.up.railway.app/*"
   ],
 
   "background": {

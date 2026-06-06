@@ -10,7 +10,7 @@ const state = {
   videoTitle: "",
   isIndexed:  false,
   isBusy:     false,        // true while indexing or awaiting answer
-  backendUrl: "http://localhost:8000",
+  backendUrl: "https://live-youtube-rag-assistant-production.up.railway.app",
 };
 
 // History stored as array of { role, text, sources }

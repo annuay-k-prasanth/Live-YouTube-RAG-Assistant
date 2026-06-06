@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Live YouTube RAG Assistant</title>
+  <link rel="stylesheet" href="popup.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+</head>
+<body>
+
+  <!-- ── HEADER ─────────────────────────────────────────── -->
+  <div class="header">
+    <div class="logo">
+      <i class="ti ti-brain" aria-hidden="true"></i>
+    </div>
+    <div class="header-text">
+      <h1>Live YouTube RAG Assistant</h1>
+      <p>LangChain + Llama 3.1</p>
+    </div>
+    <div id="statusDot" class="status-dot checking" title="Checking backend…"></div>
+  </div>
+
+  <!-- ── VIDEO BAR (shown after detection) ──────────────── -->
+  <div id="videoBar" class="video-bar hidden">
+    <div class="video-bar-inner">
+      <div class="thumb">
+        <img id="videoThumb" src="" alt="Thumbnail" />
+        <div class="thumb-play">
+          <i class="ti ti-player-play" aria-hidden="true"></i>
+        </div>
+      </div>
+      <div class="video-info">
+        <p id="videoTitle">Loading…</p>
+        <span id="videoMeta"></span>
+      </div>
+      <span id="indexBadge" class="indexed-badge pending">Not indexed</span>
+    </div>
+  </div>
+
+  <!-- ── ONBOARDING (when not on YouTube) ──────────────── -->
+  <div id="onboarding" class="onboarding hidden">
+    <i class="ti ti-brand-youtube" aria-hidden="true"></i>
+    <p class="onboard-title">Open a YouTube video</p>
+    <p class="onboard-sub">Navigate to any YouTube video and reopen this extension — it will auto-detect the video.</p>
+    <div class="manual-row">
+      <input id="manualInput" type="text" placeholder="Or paste a video ID…" class="manual-input" />
+      <button id="manualLoadBtn" class="btn-primary small">Load</button>
+    </div>
+  </div>
+
+  <!-- ── INDEX SECTION ──────────────────────────────────── -->
+  <div id="indexSection" class="index-section hidden">
+    <button id="indexBtn" class="btn-primary full">
+      <i class="ti ti-database-import" aria-hidden="true"></i>
+      <span id="indexBtnLabel">Index this video</span>
+    </button>
+    <div id="progressWrap" class="progress-wrap hidden">
+      <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+      <span id="progressLabel" class="progress-label">Fetching transcript…</span>
+    </div>
+  </div>
+
+  <!-- ── CHAT ───────────────────────────────────────────── -->
+  <div id="chatSection" class="chat-section hidden">
+    <div id="chatMessages" class="chat-area" role="log" aria-live="polite"></div>
+
+    <!-- Suggestion chips -->
+    <div id="suggestionsRow" class="suggestions">
+      <span class="sug" data-q="Give me a concise summary of this video.">Summary</span>
+      <span class="sug" data-q="What are the top 3 key takeaways from this video?">Key takeaways</span>
+      <span class="sug" data-q="What is the best advice given in this video?">Best advice</span>
+    </div>
+  </div>
+
+  <!-- ── INPUT BAR ──────────────────────────────────────── -->
+  <div id="inputBar" class="input-row hidden">
+    <div class="input-wrap">
+      <i class="ti ti-message" aria-hidden="true"></i>
+      <textarea
+        id="questionInput"
+        class="question-input"
+        placeholder="Ask anything about this video…"
+        rows="1"
+        maxlength="500"
+        aria-label="Your question"
+      ></textarea>
+    </div>
+    <button id="sendBtn" class="send-btn" disabled aria-label="Send">
+      <i class="ti ti-arrow-up" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <!-- ── FOOTER ACTIONS ────────────────────────────────── -->
+  <div id="footerBar" class="footer-bar hidden">
+    <button id="exportBtn" class="ghost-btn" title="Export chat as Markdown">
+      <i class="ti ti-download" aria-hidden="true"></i> Export
+    </button>
+    <button id="clearBtn" class="ghost-btn danger" title="Clear this conversation">
+      <i class="ti ti-trash" aria-hidden="true"></i> Clear
+    </button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

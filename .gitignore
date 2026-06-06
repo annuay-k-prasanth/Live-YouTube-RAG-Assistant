@@ -1,0 +1,25 @@
+﻿# Environment variables
+.env
+backend/.env
+*.env
+
+# Virtual environment
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+backend/__pycache__/
+*.pyc
+*.pyo
+
+# FAISS vector stores
+vectorstores/
+backend/vectorstores/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

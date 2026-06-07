@@ -4,6 +4,6 @@
 chrome.runtime.onInstalled.addListener(async () => {
   const existing = await chrome.storage.local.get("backendUrl");
   if (!existing.backendUrl) {
-    await chrome.storage.local.set({ backendUrl: "http://localhost:8000" });
+    await chrome.storage.local.set({ backendUrl: "live-youtube-rag-assistant-production.up.railway.app" });
   }
 });

@@ -177,27 +177,46 @@ async function indexVideo() {
   try {
     // Step 1 — fetch transcript from browser (your home IP)
 // Fetch transcript directly from YouTube's timedtext API
-const lang = "en";
-const transcriptRes = await fetch(
-  `https://www.youtube.com/api/timedtext?lang=en&v=${state.videoId}&fmt=json3&xorb=2&xobt=3&xovt=3`
-);
-const transcriptData = await transcriptRes.json();
+// Get transcript by running code inside the YouTube tab
+const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-if (!transcriptData.events || transcriptData.events.length === 0) {
-  throw new Error("No transcript available for this video");
+const results = await chrome.scripting.executeScript({
+  target: { tabId: tab.id },
+  func: async (videoId) => {
+    try {
+      const res = await fetch(
+        `https://www.youtube.com/watch?v=${videoId}`
+      );
+      const html = await res.text();
+      const match = html.match(/"captionTracks":\[{"baseUrl":"(.*?)"/);
+      if (!match) return { error: "No captions found for this video" };
+
+      const captionUrl = decodeURIComponent(
+        match[1].replace(/\\u0026/g, "&")
+      );
+      const capRes = await fetch(captionUrl + "&fmt=json3");
+      const capData = await capRes.json();
+
+      const transcript = capData.events
+        .filter(e => e.segs)
+        .map(e => e.segs.map(s => s.utf8).join(""))
+        .join(" ")
+        .trim();
+
+      return { transcript };
+    } catch (e) {
+      return { error: e.message };
+    }
+  },
+  args: [state.videoId]
+});
+
+const result = results[0].result;
+if (result.error || !result.transcript) {
+  throw new Error(result.error || "Could not get transcript");
 }
 
-// Flatten all text segments into plain text
-const transcript = transcriptData.events
-  .filter(e => e.segs)
-  .map(e => e.segs.map(s => s.utf8).join(""))
-  .join(" ")
-  .replace(/\n/g, " ")
-  .trim();
-
-if (!transcript) {
-  throw new Error("Could not extract transcript text");
-}
+const transcript = result.transcript;
 
 // Send to Railway for indexing
 const res = await fetch(`${state.backendUrl}/ingest-text`, {

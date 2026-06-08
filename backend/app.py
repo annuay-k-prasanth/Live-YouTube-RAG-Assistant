@@ -54,8 +54,8 @@ embeddings = HuggingFaceEmbeddings(
  
 # Using HuggingFaceEndpoint directly — no ChatHuggingFace wrapper
 llm = HuggingFaceEndpoint(
-    repo_id="mistralai/Mistral-7B-Instruct-v0.3",
-    task="conversational",
+    repo_id="HuggingFaceH4/zephyr-7b-beta",
+    task="text-generation",
     huggingfacehub_api_token=HUGGINGFACEHUB_API_TOKEN,
     max_new_tokens=512,
     temperature=0.1,

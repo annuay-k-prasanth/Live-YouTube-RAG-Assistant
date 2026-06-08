@@ -70,11 +70,13 @@ class IngestTextRequest(BaseModel):
     transcript: str
 
 embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-mpnet-base-v2"
+    model_name="sentence-transformers/all-MiniLM-L6-v2",
+    model_kwargs={"device": "cpu"},
+    encode_kwargs={"normalize_embeddings": False}
 )
 
 llm = HuggingFaceEndpoint(
-    repo_id="meta-llama/Llama-3.1-8B-Instruct",
+    repo_id="mistralai/Mistral-7B-Instruct-v0.3",
     task="text-generation",
     huggingfacehub_api_token=HUGGINGFACEHUB_API_TOKEN,
 )

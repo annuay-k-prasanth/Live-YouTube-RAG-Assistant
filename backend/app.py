@@ -29,7 +29,6 @@ from langchain_core.output_parsers import StrOutputParser
 import os
 import json
 
-import httpx
 
 
 # ======================================================
@@ -64,12 +63,9 @@ if not HUGGINGFACEHUB_API_TOKEN:
 
 vector_stores: dict = {}          # video_id → FAISS
 
-proxy_url = f"http://{os.getenv('WEBSHARE_USERNAME')}:{os.getenv('WEBSHARE_PASSWORD')}@p.webshare.io:80"
-
-
-ytt_api = YouTubeTranscriptApi(
-    http_client=httpx.Client(proxy=proxy_url)
-)
+class IngestTextRequest(BaseModel):
+    video_id: str
+    transcript: str
 
 embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-mpnet-base-v2"
@@ -180,14 +176,12 @@ def status(video_id: str):
 # INGEST
 # ======================================================
 
-@app.post("/ingest")
-def ingest(req: IngestRequest):
+@app.post("/ingest-text")
+def ingest_text(req: IngestTextRequest):
     try:
-        # Already in RAM
         if req.video_id in vector_stores:
             return {"status": "already_indexed"}
 
-        # Already on disk
         path = vs_path(req.video_id)
         if os.path.exists(path):
             vector_stores[req.video_id] = FAISS.load_local(
@@ -197,33 +191,21 @@ def ingest(req: IngestRequest):
             )
             return {"status": "loaded_from_disk"}
 
-        # Fetch transcript
-        transcript_list = ytt_api.fetch(
-            req.video_id, languages=["en", "hi"]
-        )
-        transcript = " ".join(chunk.text for chunk in transcript_list)
-
-        # Chunk
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,
         )
-        chunks = splitter.create_documents([transcript])
-
-        # Embed + index
+        chunks = splitter.create_documents([req.transcript])
         vs = FAISS.from_documents(chunks, embeddings)
 
-        # Persist
         os.makedirs("vectorstores", exist_ok=True)
         vs.save_local(path)
-
         vector_stores[req.video_id] = vs
 
         return {"status": "indexed", "chunks": len(chunks)}
 
     except Exception as e:
         return {"error": str(e)}
-
 # ======================================================
 # ASK  (non-streaming fallback)
 # ======================================================

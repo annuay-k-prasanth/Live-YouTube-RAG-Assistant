@@ -175,12 +175,26 @@ async function indexVideo() {
   }, 2000);
 
   try {
-    const res  = await fetch(`${state.backendUrl}/ingest`, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ video_id: state.videoId }),
-    });
-    const data = await res.json();
+    // Step 1 — fetch transcript from browser (your home IP)
+const transcriptRes = await fetch(
+  `https://api.supadata.ai/v1/youtube/transcript?videoId=${state.videoId}&text=true`
+);
+const transcriptData = await transcriptRes.json();
+
+if (!transcriptData.content) {
+  throw new Error("Could not fetch transcript for this video");
+}
+
+// Step 2 — send transcript to Railway for indexing
+const res = await fetch(`${state.backendUrl}/ingest-text`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    video_id: state.videoId,
+    transcript: transcriptData.content,
+  }),
+});
+const data = await res.json();
     clearInterval(ticker);
 
     if (data.error) throw new Error(data.error);

@@ -179,7 +179,7 @@ async function indexVideo() {
 // Fetch transcript directly from YouTube's timedtext API
 const lang = "en";
 const transcriptRes = await fetch(
-  `https://www.youtube.com/api/timedtext?lang=${lang}&v=${state.videoId}&fmt=json3`
+  `https://www.youtube.com/api/timedtext?lang=en&v=${state.videoId}&fmt=json3&xorb=2&xobt=3&xovt=3`
 );
 const transcriptData = await transcriptRes.json();
 

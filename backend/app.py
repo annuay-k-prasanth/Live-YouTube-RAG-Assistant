@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api.proxies import WebshareProxyConfig
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -61,6 +62,13 @@ if not HUGGINGFACEHUB_API_TOKEN:
 # ======================================================
 
 vector_stores: dict = {}          # video_id → FAISS
+
+proxy_config = WebshareProxyConfig(
+    proxy_username=os.getenv("WEBSHARE_USERNAME"),
+    proxy_password=os.getenv("WEBSHARE_PASSWORD"),
+)
+
+ytt_api = YouTubeTranscriptApi(proxies=proxy_config)
 
 embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-mpnet-base-v2"
@@ -189,7 +197,7 @@ def ingest(req: IngestRequest):
             return {"status": "loaded_from_disk"}
 
         # Fetch transcript
-        transcript_list = YouTubeTranscriptApi().fetch(
+        transcript_list = ytt_api.fetch(
             req.video_id, languages=["en", "hi"]
         )
         transcript = " ".join(chunk.text for chunk in transcript_list)

@@ -356,10 +356,10 @@ function formatMarkdown(text) {
   return text
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
-    .replace(/^\d+\.\s(.+)/gm, "<li>$1</li>")
-    .replace(/^[-•]\s(.+)/gm, "<li>$1</li>")
-    .replace(/(<li>.*<\/li>)/gs, match => `<ul>${match}</ul>`)
     .replace(/^##\s(.+)/gm, "<strong style='font-size:13px;display:block;margin-top:8px'>$1</strong>")
+    .replace(/(?:^|\n)(\d+\.\s.+)(?=\n|$)/g, (_, item) => `<li>${item.replace(/^\d+\.\s/, '')}</li>`)
+    .replace(/(?:^|\n)([-•]\s.+)(?=\n|$)/g, (_, item) => `<li>${item.replace(/^[-•]\s/, '')}</li>`)
+    .replace(/(<li>[\s\S]*?<\/li>)+/g, match => `<ul>${match}</ul>`)
     .replace(/\n/g, "<br>");
 }
 

@@ -135,6 +135,7 @@ Answer:""",
         | prompt
         | llm
         | StrOutputParser()
+        |  RunnableLambda(lambda x: x.split("Answer:")[-1].strip())
     )
  
 # ======================================================
@@ -216,7 +217,7 @@ async def ingest(req: IngestRequest):
 # ======================================================
  
 @app.post("/ingest-text")
-def ingest_text(req: IngestTextRequest):
+async def ingest_text(req: IngestTextRequest):
     try:
         if req.video_id in vector_stores:
             return {"status": "already_indexed"}
@@ -257,6 +258,11 @@ def ask(req: AskRequest):
  
         chain  = build_chain(retriever)
         answer = chain.invoke(req.question)
+
+        answer = answer.split("Answer:")[-1].strip()
+
+        if not answer or len(answer) < 3:
+            return {"answer": "The model returned an empty response. Please try again."}
  
         # Clean HuggingFace error responses
         if isinstance(answer, str) and answer.strip().startswith('{"error"'):
@@ -289,16 +295,17 @@ def ask_stream(req: AskRequest):
  
     def token_generator():
         try:
-            for token in chain.stream(req.question):
-                if token:
-                    payload = json.dumps({"token": token})
-                    yield f"data: {payload}\n\n"
+            answer = chain.invoke(req.question)
+            # Strip prompt echo
+            answer = answer.split("Answer:")[-1].strip()
+            payload = json.dumps({"token": answer})
+            yield f"data: {payload}\n\n"
         except Exception as e:
             error_msg = str(e)
             if "429" in error_msg or "Rate limit" in error_msg:
-                msg = "Rate limit reached. Please wait 1-2 minutes and try again."
+                msg = "Rate limit reached. Please wait 1–2 minutes and try again."
             else:
-                msg = "Something went wrong. Please try again."
+                msg = f"Something went wrong: {error_msg}"
             yield f'data: {{"token": "{msg}"}}\n\n'
         finally:
             yield "data: [DONE]\n\n"

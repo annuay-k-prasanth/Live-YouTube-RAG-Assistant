@@ -27,8 +27,8 @@
 
   "host_permissions": [
   "https://live-youtube-rag-assistant-production.up.railway.app/*",
-  "https://api.supadata.ai/*"
-  ],
+  "https://www.youtube.com/*"
+],
 
   "background": {
     "service_worker": "background.js"

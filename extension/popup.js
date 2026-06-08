@@ -176,22 +176,36 @@ async function indexVideo() {
 
   try {
     // Step 1 — fetch transcript from browser (your home IP)
+// Fetch transcript directly from YouTube's timedtext API
+const lang = "en";
 const transcriptRes = await fetch(
-  `https://api.supadata.ai/v1/youtube/transcript?videoId=${state.videoId}&text=true`
+  `https://www.youtube.com/api/timedtext?lang=${lang}&v=${state.videoId}&fmt=json3`
 );
 const transcriptData = await transcriptRes.json();
 
-if (!transcriptData.content) {
-  throw new Error("Could not fetch transcript for this video");
+if (!transcriptData.events || transcriptData.events.length === 0) {
+  throw new Error("No transcript available for this video");
 }
 
-// Step 2 — send transcript to Railway for indexing
+// Flatten all text segments into plain text
+const transcript = transcriptData.events
+  .filter(e => e.segs)
+  .map(e => e.segs.map(s => s.utf8).join(""))
+  .join(" ")
+  .replace(/\n/g, " ")
+  .trim();
+
+if (!transcript) {
+  throw new Error("Could not extract transcript text");
+}
+
+// Send to Railway for indexing
 const res = await fetch(`${state.backendUrl}/ingest-text`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
     video_id: state.videoId,
-    transcript: transcriptData.content,
+    transcript: transcript,
   }),
 });
 const data = await res.json();

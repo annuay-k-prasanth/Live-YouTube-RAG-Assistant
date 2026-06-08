@@ -412,3 +412,16 @@ html, body {
   padding: 8px 14px;
   border-top: 1px solid var(--border);
 }
+
+.msg-bubble ul,
+.msg-bubble ol {
+  padding-left: 16px;
+  margin: 6px 0;
+}
+.msg-bubble li {
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+.msg-bubble strong {
+  font-weight: 600;
+}

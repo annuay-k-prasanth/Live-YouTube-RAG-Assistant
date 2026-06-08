@@ -8,3 +8,6 @@ faiss-cpu
 youtube-transcript-api
 sentence-transformers
 huggingface-hub
+youtube-transcript-api>=0.6.0
+httpx
+

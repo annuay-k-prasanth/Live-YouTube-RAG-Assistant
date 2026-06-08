@@ -305,12 +305,12 @@ async function streamAnswer(question, typingEl) {
 
       try {
         const obj = JSON.parse(payload);
-        if (obj.token)   { fullText += obj.token; bubble.textContent = fullText; }
+        if (obj.token)   { fullText += obj.token; bubble.innerHTML = formatMarkdown(fullText);; }
         if (obj.sources) { sources = obj.sources; }
       } catch {
         // Plain text token (non-JSON SSE)
         fullText += payload;
-        bubble.textContent = fullText;
+        bubble.innerHTML = formatMarkdown(fullText);
       }
     }
     scrollChat();
@@ -348,10 +348,34 @@ function createBubble(role) {
 
 function renderBubble(role, text, sources = [], scroll = true) {
   const { row, bubble } = createBubble(role);
-  bubble.textContent = text;
+  if (role === "bot") {
+    bubble.innerHTML = formatMarkdown(text);
+  } else {
+    bubble.textContent = text;
+  }
   if (sources.length && role === "bot") addSourceChips(bubble, sources);
   dom.chatMessages.appendChild(row);
   if (scroll) scrollChat();
+}
+
+function formatMarkdown(text) {
+  return text
+    // Bold **text**
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    // Italic *text*
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    // Numbered list: "1. item" → <ol>
+    .replace(/^\d+\.\s(.+)/gm, "<li>$1</li>")
+    // Bullet list: "- item" or "• item" → <ul>
+    .replace(/^[-•]\s(.+)/gm, "<li>$1</li>")
+    // Wrap consecutive <li> items in <ul> or <ol>
+    .replace(/(<li>.*<\/li>)/gs, (match) => {
+      return match.includes("1.") ? `<ol>${match}</ol>` : `<ul>${match}</ul>`;
+    })
+    // Headings: ## heading
+    .replace(/^##\s(.+)/gm, "<strong style='font-size:13px;display:block;margin-top:8px'>$1</strong>")
+    // Single newlines → line breaks
+    .replace(/\n/g, "<br>");
 }
 
 function addSourceChips(bubble, sources) {

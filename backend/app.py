@@ -76,7 +76,7 @@ embeddings = HuggingFaceEmbeddings(
 )
 
 llm = HuggingFaceEndpoint(
-    repo_id="mistralai/Mistral-7B-Instruct-v0.3",
+    repo_id="HuggingFaceH4/zephyr-7b-beta",
     task="text-generation",
     huggingfacehub_api_token=HUGGINGFACEHUB_API_TOKEN,
 )

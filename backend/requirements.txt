@@ -8,9 +8,9 @@ langchain-community
 langchain-huggingface
 langchain-text-splitters
 
-faiss-cpu==1.8.0
-sentence-transformers==3.0.1
-huggingface_hub==0.24.6
+faiss-cpu
+sentence-transformers
+huggingface_hub
 
 youtube-transcript-api
 httpx

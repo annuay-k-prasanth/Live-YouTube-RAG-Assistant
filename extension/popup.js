@@ -296,7 +296,7 @@ async function streamAnswer(question, typingEl) {
     for (const line of chunk.split("\n")) {
       if (!line.startsWith("data: ")) continue;
       const payload = line.slice(6).trim();
-      if (payload === "[DONE]") break;
+      if (payload === "[DONE]") continue;
 
       try {
         const obj = JSON.parse(payload);

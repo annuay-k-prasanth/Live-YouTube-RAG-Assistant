@@ -7,6 +7,6 @@ langchain-core
 faiss-cpu
 youtube-transcript-api
 sentence-transformers
-huggingface-hub
+huggingface_hub
 httpx
 

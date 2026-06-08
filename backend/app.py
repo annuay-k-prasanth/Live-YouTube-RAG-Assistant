@@ -28,6 +28,8 @@ from langchain_core.output_parsers import StrOutputParser
 
 import os
 import json
+import httpx
+
 
 
 
@@ -176,8 +178,8 @@ def status(video_id: str):
 # INGEST
 # ======================================================
 
-@app.post("/ingest-text")
-def ingest_text(req: IngestTextRequest):
+@app.post("/ingest")
+async def ingest(req: IngestRequest):
     try:
         if req.video_id in vector_stores:
             return {"status": "already_indexed"}
@@ -185,17 +187,32 @@ def ingest_text(req: IngestTextRequest):
         path = vs_path(req.video_id)
         if os.path.exists(path):
             vector_stores[req.video_id] = FAISS.load_local(
-                path,
-                embeddings,
+                path, embeddings,
                 allow_dangerous_deserialization=True,
             )
             return {"status": "loaded_from_disk"}
 
+        # Fetch transcript via Supadata
+        async with httpx.AsyncClient() as client:
+            res = await client.get(
+                f"https://api.supadata.ai/v1/youtube/transcript",
+                params={"videoId": req.video_id, "text": "true"},
+                headers={"x-api-key": os.getenv("SUPADATA_API_KEY")},
+                timeout=30
+            )
+            data = res.json()
+
+        if "error" in data:
+            return {"error": data["error"]}
+
+        transcript = data.get("content", "")
+        if not transcript:
+            return {"error": "No transcript found"}
+
         splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200,
+            chunk_size=1000, chunk_overlap=200
         )
-        chunks = splitter.create_documents([req.transcript])
+        chunks = splitter.create_documents([transcript])
         vs = FAISS.from_documents(chunks, embeddings)
 
         os.makedirs("vectorstores", exist_ok=True)

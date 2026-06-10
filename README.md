@@ -1,4 +1,4 @@
-**Live YouTube RAG Assistant**
+Live YouTube RAG Assistant
 Ask anything about any YouTube video — powered by LangChain, Llama 3.1, and FAISS vector search.
 
 📌 Overview
